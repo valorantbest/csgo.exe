@@ -4,16 +4,23 @@ name: vps
 
 # Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # This workflow contains multiple jobs using matrix strategy
   build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     
+    # Matrix strategy for 50 parallel jobs
     strategy:
       fail-fast: false
       max-parallel: 50
@@ -25,24 +32,9 @@ jobs:
 
       - name: Setup tmate session - Shard ${{ matrix.shard }}
         run: |
-          # Paket listesini güncelle ve tmate yükle
-          sudo apt-get update && sudo apt-get install -y tmate
+          # tmate'i yükle
+          sudo apt update
+          sudo apt install -y tmate
 
           echo "🟢 tmate başlatılıyor - Shard ${{ matrix.shard }}, baba..."
-          
-          # tmate soketini arka planda temiz bir şekilde ayağa kaldırıyoruz
-          tmate -S /tmp/tmate.sock new-session -d
-          tmate -S /tmp/tmate.sock wait-for session-established
-          
-          echo "🔗 ========================================"
-          echo "🔗 SSH BAĞLANTI LİNKİN BURADA BABA:"
-          tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
-          echo "🔗 ========================================"
-          echo "🔗 WEB TERMİNAL LİNKİN BURADA BABA:"
-          tmate -S /tmp/tmate.sock display -p '#{tmate_web}'
-          echo "🔗 ========================================"
-          
-          # Sunucunun hemen kapanmaması için soket aktif olduğu sürece döngüde tutuyoruz
-          while [ -S /tmp/tmate.sock ]; do
-            sleep 10
-          done
+          tmate -F
