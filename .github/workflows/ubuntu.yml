@@ -1,0 +1,32 @@
+name: 20li Mega VDS Deneyi
+on: workflow_dispatch
+
+jobs:
+  mega-vds:
+    runs-on: ubuntu-latest
+    strategy:
+      # Biri hata verirse diğerlerini durdurma, hepsi sonuna kadar zorlasın
+      fail-fast: false 
+      matrix:
+        # 1'den 20'ye kadar 20 farklı paralel makine tetikler
+        id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    
+    steps:
+    - name: Sistem Altyapisini Hazirla
+      run: |
+        sudo apt update
+        sudo apt install -y tmate
+    - name: VDS Baglantisini Baslat
+      run: |
+        tmate -S /tmp/tmate.sock new-session -d
+        tmate -S /tmp/tmate.sock wait tmate
+        echo "========================================="
+        echo ">>> MAKINE NUMARASI: ${{ matrix.id }} <<<"
+        echo "========================================="
+        echo "WEB LINKI:"
+        tmate -S /tmp/tmate.sock display -p '#{tmate_web}'
+        echo "-----------------------------------------"
+        echo "SSH KODU:"
+        tmate -S /tmp/tmate.sock display -p '#{tmate_ssh}'
+        echo "========================================="
+        sleep 21600 # 6 saat acik tutmaya zorla
